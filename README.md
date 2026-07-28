@@ -5,7 +5,7 @@ What booked customers ask while they wait to be installed.
 Analysis of Wiom post-booking support chat across the booking-to-installation journey,
 comparing 8–30 June 2026 against 1–22 July 2026, with the app-install → booked → installed funnel.
 
-**[Read the report →](https://REPLACE_ME)**
+**[Read the report →](https://rukmumvatsalya.github.io/wiom-postbooking-install-report/)**
 
 ## Scope
 
