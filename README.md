@@ -16,3 +16,7 @@ comparing 8–30 June 2026 against 1–22 July 2026, with the app-install → bo
 ## Build
 
 Single self-contained HTML file — no scripts, no external requests. Open `index.html` or serve the directory.
+
+## Methodology
+
+See [CONTEXT.md](CONTEXT.md) — data sources, metric definitions, the acquisition-funnel logic, caveats (contamination, censoring, identity gap), and the v1→v2 corrections.
