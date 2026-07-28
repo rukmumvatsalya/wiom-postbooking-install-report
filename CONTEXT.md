@@ -20,11 +20,19 @@ All pulled live from Metabase (Snowflake), database `Snowflake` (id 113).
 | Table | What it provides |
 |---|---|
 | `PROD_DB.DYNAMODB_READ.INTENT_CLASSIFICATIONS` | The support chat. Every customer message, its classified intent, sentiment, and the customer's `USER_STATE` at the time. Post-booking rows are those where `APP_PAGE_NAME IS NULL` and `USER_STATE` is populated. |
-| `PROD_DB.PUBLIC.BOOKING_LOGS` | The booking event log (`EVENT_NAME`, `MOBILE`, `ADDED_TIME`). Source for the acquisition funnel: `booking_confirmed`, `booking_fee_captured`, `slot_confirmed_by_customer`, `installed`. |
-| App-install counts (48,118 June / 49,800 July) | **Supplied externally** (app analytics). Not queried; used as the funnel's top denominator. |
+| `PROD_DB.PUBLIC.BOOKING_LOGS` | The booking event log (`EVENT_NAME`, `MOBILE`, `ADDED_TIME`). Used for the earlier fee→chat contact-rate section. |
+| **`Booking To Install.xlsx` → `B2I_Agg` sheet** | **The authoritative booking-to-install dataset** (one row per booking window, 12,392 rows, May–Jul 2026) with every stage timestamp, `is_installed`, `is_refunded`, `final_category` (non-conversion reason), `group_name` (cost-breakdown variant), and `b2i_tat_days`. **This is now the source for the funnel, non-conversion reasons, install-by-variant, and TAT.** |
+| App-install counts (48,118 June / 49,800 July) | **Supplied externally** (app analytics). Used as the funnel's top denominator. |
 
-`PROD_DB.DBT_CSP.FCT_BOOKING_TO_INSTALL_JOURNEY` looked ideal (one row per connection with stage flags) but
-is **stale** — only 98 rows from May 2026 — so the funnel was rebuilt from `BOOKING_LOGS` events instead.
+`PROD_DB.DBT_CSP.FCT_BOOKING_TO_INSTALL_JOURNEY` (the warehouse equivalent) is **stale** — only 98 rows from
+May 2026 — so the funnel uses the `B2I_Agg` extract instead.
+
+**Funnel figures updated 28 Jul 2026** to the `B2I_Agg` authoritative data, computed for the report's exact
+windows (8–30 Jun / 1–22 Jul, by `booking_confirm_date`). Headline: bookings 3,162 (Jun) / 4,790 (Jul);
+install % ~25% / 26%; the biggest leak is **technician assigned (50%) → arrived (~28%)**, and the top reason a
+booking never installs is **non-serviceable area (55–57% of non-installs)**. Variants **G (9.4%)** and
+**H (12.4%)** install far below I/I1/C/D/E (31–35%). The earlier `BOOKING_LOGS` funnel numbers (3,084 → 827 etc.)
+are superseded by these.
 
 ---
 
