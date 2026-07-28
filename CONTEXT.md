@@ -32,7 +32,10 @@ is **stale** — only 98 rows from May 2026 — so the funnel was rebuilt from `
 
 - **Windows:** 8–30 June (23 days) vs 1–22 July (22 days). Per-customer rates compare directly; raw totals do not (unequal length).
 - **Timezone:** `INTENT_CLASSIFICATIONS.CREATED_AT` is UTC → always `DATEADD(minute, 330, …)` for IST.
-  `BOOKING_LOGS.ADDED_TIME` is already IST (`TIMESTAMP_TZ`) → no shift.
+  `BOOKING_LOGS.ADDED_TIME` is **also UTC** (stored as `TIMESTAMP_NTZ`, no timezone) → same `DATEADD(minute, 330, …)` shift.
+  *(Corrected 28 Jul 2026: an earlier version of this note claimed `ADDED_TIME` was already IST. It is not — the
+  hour-of-day activity trough lands at 3:30–6:30 AM IST only under the UTC reading, and the published funnel
+  numbers themselves reproduce only with the +330 shift, so the queries were right and this note was wrong.)*
 - **De-duplication:** messages de-duped on `(MOBILE, TRIM(USER_MESSAGE), TIMESTAMP)`.
 - **`_FIVETRAN_DELETED` is NOT filtered** on `INTENT_CLASSIFICATIONS` — DynamoDB TTL is 7 days, so filtering
   would silently keep only the last week.
@@ -53,11 +56,15 @@ Cohorted on customers who **booked in the window**; later stages counted at any 
 | Moved to install | `slot_confirmed_by_customer` | 1,967 | 2,661 |
 | Installed | `installed` | 827 | 1,266 |
 
-**Two cautions:**
+**Three cautions:**
 1. **App-install → booked is a period ratio, not a tracked cohort.** The app-analytics id does not join to the
    booking mobile, so this is *bookings-in-window ÷ installs-in-window*, not "these exact 48,118 people."
 2. **Installs are right-censored.** A customer who booked on 22 July has had only days to be installed, so July's
    install count is understated. June (a month of runway, ~27% of bookings installed) is the more complete read.
+3. **The "paid booking fee" row is all fee payers in the window, not a subset of the booked row.** ~109 (June) /
+   ~158 (July) fee payers have no `booking_confirmed` event inside the same window; restricting to the booked
+   cohort gives 2,494 / 3,132. The all-payers definition is the one the contact-rate section also uses, so the
+   report is internally consistent — just don't read the funnel as strictly nested at that row.
 
 ---
 
@@ -79,6 +86,13 @@ measured by their intent mix. This split is the core of the analysis — see the
 - **Messages per customer** = de-duped messages ÷ distinct customers, within the window.
 - **Contact rate** = of customers who paid a booking fee in the window, the share who also appear in support chat
   (~87% June, ~89% July — a floor, since payers who chat after the window aren't counted).
+- **"What they ask" counts** = unique **customer × journey-state** pairs, not unique customers: a customer asking
+  the same thing from two states counts twice. This mostly affects cross-state intents — checkStatus's 5,035 (June)
+  is ~3,600 distinct customers across ~5,000 state-contexts; concentrated intents (internetIssue, callRohit) are
+  barely inflated.
+- **State-table "Customers"** = June + July per-window counts summed (a customer chatting in both windows counts
+  twice). The four-tier table instead counts distinct customers across both windows combined — the two tables'
+  customer columns are deliberately on different bases and won't reconcile by addition.
 
 ---
 
