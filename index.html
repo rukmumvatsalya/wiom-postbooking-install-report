@@ -287,6 +287,17 @@ html{scroll-behavior:smooth}
 .tocgrid a:hover{color:var(--jun)}
 .tocgrid a .n{font-family:var(--mono);font-size:11px;color:var(--ink3);min-width:18px}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* ---------- index as fixed LEFT sidebar on wide screens ---------- */
+@media (min-width:1120px){
+  body{padding-left:270px}
+  .toc{position:fixed;top:0;left:0;width:270px;height:100dvh;overflow-y:auto;margin:0;z-index:5;
+       border:0;border-right:1px solid var(--rule);border-radius:0;padding:30px 22px 44px;background:var(--paper)}
+  .toc h3{margin:0 0 16px}
+  .tocgrid{grid-template-columns:1fr;gap:1px}
+  .tocgrid a{padding:6px 0;font-size:12.5px}
+  .tocgrid a .n{min-width:20px}
+}
 </style></head><body><div class="page">
 <header class="mast">
 <div class="kicker">Post-booking chat &middot; booking &rarr; installation &middot; 8&ndash;30 Jun vs 1&ndash;22 Jul 2026</div>
